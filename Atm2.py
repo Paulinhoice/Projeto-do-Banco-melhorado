@@ -17,17 +17,19 @@ conta_corrente = {"11011011074" : {"contas" : {"1": {"saldo" :"100"},"2":{"saldo
 def criar_usuarios(cpf,idconta,nome,nascimento,endereco):
 
   if cpf in conta_corrente:
-    conta_corrente[cpf]["contas"].update({idconta : {"saldo" : 0}})
+    conta_corrente[cpf]["contas"].update({str(idconta): {"saldo" : 0}})
   else:
     usuarios.update({cpf :{"nome" : nome, "nascimento" : nascimento, "endereco" : endereco}})
-    conta_corrente.update({cpf : {"contas" : {idconta : {"saldo" : 0}}}})
-def deposito(saldo,valor_deposito):
+    conta_corrente.update({cpf : {"contas" : {str(idconta) : {"saldo" : 0}}}})
+
+def deposito(cpf,idconta,valor_deposito):
   if valor_deposito <= 0:
     print("Você não depositou nenhum valor.")
 
   else:
-    saldo += valor_deposito
-    return(print(f"Seu saldo agora é {saldo}"))        
+    conta_corrente[cpf]["contas"][idconta]["saldo"] += valor_deposito
+    print(f"Seu saldo agora é {conta_corrente[cpf]['contas'][idconta]['saldo']}")
+
 def menu_clear():
 
     sleep(5)
@@ -35,34 +37,19 @@ def menu_clear():
 
     clear = lambda: os.system('cls')
     clear()
-def depositar():
 
-def sacar():
+def sacar(cpf,idconta,valor_sacado):
+  if valor_sacado <= 0:
+    print("Você não sacou nenhum valor.")
+  elif valor_sacado > conta_corrente[cpf]["contas"][idconta]["saldo"]:
+    print("Você não possui um saldo insuficiente")
+  else: 
+    conta_corrente[cpf]["contas"][idconta]["saldo"] -= valor_sacado
+    print(f"Seu saldo agora é {conta_corrente[cpf]['contas'][idconta]['saldo']}")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def extrato(cpf,idconta):
+  saldo = conta_corrente[cpf]["contas"][idconta]["saldo"]
+  print(f"seu saldo é {saldo}")
 
 #loop para a tela de login do ATM
 
@@ -76,14 +63,15 @@ while True:
 
   if login == "N":
     cpf = input("Diga seu CPF: ")
-    nome = input("Diga seu Nome:")
-    endereco = input("Diga aonde o nome da sua rua,bairro,cidade/estado")
-    nascimento = input("Diga sua data de nascimento:")
+    nome = input("Diga seu Nome: ")
+    endereco = input("Diga aonde o nome da sua rua,bairro,cidade/estado: ")
+    nascimento = input("Diga sua data de nascimento: ")
 
 
     usarios_cadastrados += 1
     criar_usuarios(cpf,usarios_cadastrados,nome,nascimento,endereco)
-    print (conta_corrente.items())
+    informarid = usarios_cadastrados
+    print(f"O id da sua conta é {informarid}")
 
 
 
@@ -91,12 +79,45 @@ while True:
 #Procedimento para Entrar em uma conta
 
   elif login == "Y":
-    cpf = input("Diga seu CPF")
-    nome = usuarios[cpf]["nome"]
+    cpf = input("Diga seu CPF: ")
+    
     if cpf in usuarios:
-      idconta =  input(f"Ola,{nome} Informe o numero da sua conta 0001-X")
-      saldo = conta_corrente[cpf]["contas"][idconta]["saldo"]
-      print(saldo)
+      nome = usuarios[cpf]["nome"]
+      idconta =  input(f"Ola,{nome} Informe o numero da sua conta 0001-X ")
+      
+      if idconta in conta_corrente[cpf]["contas"]:
+        saldo = conta_corrente[cpf]["contas"][idconta]["saldo"]
+      
+        menu = -1
+        while menu != 0:
+          menu = int(input("""
+
+          #####---Bem vindo---#####
+            [1] Deposito
+            [2] Saque
+            [3] Extrato
+            [0] Sair
+          #####---------------#####
+    
+            """ ))
+        
+
+
+        #Executando Procendimentos bancaerios do banco
+      
+          if(menu == 1):
+            valor_depositado = float(input(f"Quanto você deseja depositar {nome}?: "))
+            deposito(cpf,idconta,valor_depositado)
+            
+          elif(menu == 2):
+            valor_sacado = float(input(f"Quando você deseja sacar {nome}?: "))
+            sacar(cpf,idconta,valor_depositado)
+
+          elif(menu == 3):
+            extrato(cpf,idconta)
+
+
 
     else:
-      break  
+      print("Não localizamos seu usuario")
+      login == "notfound"
